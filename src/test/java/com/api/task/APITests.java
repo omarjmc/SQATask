@@ -1,6 +1,7 @@
 package com.api.task;
 
 import io.restassured.RestAssured;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static io.restassured.RestAssured.given;
@@ -9,6 +10,16 @@ import static org.hamcrest.Matchers.equalTo;
 public class APITests {
 
     public final String BASE_URI = "https://jsonplaceholder.typicode.com";
+
+    @DataProvider(name = "parameters")
+    public Object[][] endpointParams(){
+        return new Object[][] {{1}, {2}};
+    }
+
+    @DataProvider(name = "postMethod")
+    public Object[][] postParameters(){
+        return new Object[][] {{"task", "SQATask", 1}, {"foo", "bar", 1}};
+    }
 
     @Test
     public void testGetEndpoint(){
@@ -24,87 +35,87 @@ public class APITests {
 
     }
 
-    @Test
-    public void testGetPost(){
+    @Test(dataProvider = "parameters")
+    public void testGetPost(int val){
 
         RestAssured.baseURI = BASE_URI;
 
         given()
                 .when()
-                .get("/posts/1")
+                .get("/posts/" + String.valueOf(val))
                 .then()
                 .statusCode(200)
-                .body("id", equalTo(1))
+                .body("id", equalTo(val))
                 .body("userId", equalTo(1));
 
     }
 
-    @Test
-    public void testGetPostComments(){
+    @Test(dataProvider = "parameters")
+    public void testGetPostComments(int val){
 
         RestAssured.baseURI = BASE_URI;
 
-        String comments = RestAssured.given().when().get("/posts/1/comments").prettyPrint();
+        String comments = RestAssured.given().when().get("/posts/" + String.valueOf(val) + "/comments").prettyPrint();
         System.out.println(comments);
     }
 
-    @Test
-    public void testGetParameters(){
+    @Test(dataProvider = "parameters")
+    public void testGetParameters(int val){
 
         RestAssured.baseURI = BASE_URI;
 
-        String comments = RestAssured.given().when().get("/comments?postId=1").prettyPrint();
+        String comments = RestAssured.given().when().get("/comments?postId=" + String.valueOf(val)).prettyPrint();
         System.out.println(comments);
     }
 
-    @Test
-    public void testPostEndpoint(){
+    @Test(dataProvider = "postMethod")
+    public void testPostEndpoint(String title, String body, int id){
 
         RestAssured.baseURI = BASE_URI;
 
         given()
                 .header("Content-Type", "application/json")
-                .body("{\"title\": \"task\", \"body\": \"SQATask\", \"userId\": 1}")
+                .body("{\"title\": \""+ title +"\", \"body\": \""+ body +"\", \"userId\": "+ id +"}")
                 .when()
                 .post("/posts")
                 .then()
                 .statusCode(201)
-                .body("title", equalTo("task"))
-                .body("body", equalTo("SQATask"))
+                .body("title", equalTo(title))
+                .body("body", equalTo(body))
                 .body("userId", equalTo(1));
 
     }
 
-    @Test
-    public void testPutEndpoint(){
+    @Test(dataProvider = "parameters")
+    public void testPutEndpoint(int val){
 
         RestAssured.baseURI = BASE_URI;
 
         given()
                 .when()
-                .put("/posts/1");
+                .put("/posts/" + String.valueOf(val));
 
     }
 
-    @Test
-    public void testPatchEndpoint(){
+    @Test(dataProvider = "parameters")
+    public void testPatchEndpoint(int val){
 
         RestAssured.baseURI = BASE_URI;
 
         given()
                 .when()
-                .patch("/posts/1");
+                .patch("/posts/" + String.valueOf(val));
 
     }
 
-    @Test
-    public void testDeleteEndpoint(){
+    @Test(dataProvider = "parameters")
+    public void testDeleteEndpoint(int val){
 
         RestAssured.baseURI = BASE_URI;
 
         given()
                 .when()
-                .delete("/posts/1");
+                .delete("/posts/" + String.valueOf(val));
 
     }
 }
