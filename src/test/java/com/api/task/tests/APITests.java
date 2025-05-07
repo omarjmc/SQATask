@@ -1,15 +1,11 @@
 package com.api.task.tests;
 
 import com.api.task.utils.ConfRequest;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
 
 public class APITests {
 
@@ -17,12 +13,12 @@ public class APITests {
 
     @DataProvider(name = "parameters")
     public Object[][] endpointParams(){
-        return new Object[][] {{1}, {2}};
+        return new Object[][] {{1}, {3}};
     }
 
     @DataProvider(name = "postMethod")
     public Object[][] postParameters(){
-        return new Object[][] {{"task", "SQATask", 1}, {"foo", "bar", 1}};
+        return new Object[][] {{"task", "SQATask", 1, 201}, {"foo", "bar", 1, 201}};
     }
 
     @Test
@@ -36,7 +32,7 @@ public class APITests {
     @Test(dataProvider = "parameters")
     public void testGetPost(int val){
 
-        Response res = ConfRequest.getResponse("posts", "1");
+        Response res = ConfRequest.getResponse("posts", String.valueOf(val));
         ConfRequest.validateResponseCode(res, 200);
         ConfRequest.validateResponseParameter(res, "id", val);
         ConfRequest.validateResponseParameter(res, "userId", 1);
@@ -58,7 +54,7 @@ public class APITests {
     }
 
     @Test(dataProvider = "postMethod")
-    public void testPostEndpoint(String title, String body, int id){
+    public void testPostEndpoint(String title, String body, int id, int responseCode){
 
         HashMap<String, String> params = new HashMap<>();
         params.put("title", title);
@@ -66,7 +62,7 @@ public class APITests {
         params.put("userId", String.valueOf(id));
 
         Response response = ConfRequest.getPostResponse("posts", params);
-        ConfRequest.validateResponseCode(response, 201);
+        ConfRequest.validateResponseCode(response, responseCode);
         ConfRequest.validateResponseParameter(response, "title", title);
         ConfRequest.validateResponseParameter(response, "body", body);
         ConfRequest.validateResponseParameter(response, "userId", id);
